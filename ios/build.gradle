@@ -1,0 +1,42 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://dl.bintray.com/jetbrains/kotlin-native-dependencies" }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-native-gradle-plugin:0.8.1"
+    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.konan' version "0.8.1"
+}
+
+konan.targets = ['iphone', 'iphone_sim']
+
+konanArtifacts {
+    framework('Domain') {
+        enableMultiplatform true
+    }
+}
+
+dependencies {
+    expectedBy project(':common')
+}
+
+
+
+task copyFramework() {
+    dependsOn('compileDebugIos_x64KotlinNative')
+    doLast {
+        if (project.hasProperty("konan.configuration.build.dir")) {
+            def srcFile = tasks['compileDebugIos_x64KotlinNative'].outputFile
+            def targetDir = getProperty("konan.configuration.build.dir") + "/Domain.framework"
+            copy {
+                from srcFile
+                into targetDir
+            }
+        }
+    }
+}
